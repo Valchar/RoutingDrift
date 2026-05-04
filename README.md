@@ -32,9 +32,7 @@ In isolation, the kernels are genuinely fast:
 
 The catch is Amdahl's Law. RMSNorm only takes up **1.91% of OLMoE's forward pass time**, and Softmax is basically nothing. So even a 7.3x isolated speedup gives you a predicted E2E ceiling of just **1.015x**. The measured E2E confirmed this: OLMoE with Triton kernels runs at **0.985x** the baseline at seq=512 batch=4 because the kernel's launch overhead doesn't amortize at small batch sizes.
 
-On Mixtral-8x7B-GPTQ the result was much worse: **0.037x measured speedup**, which is roughly a 27x regression. The GPTQ-quantized weights use a packed INT4 memory layout that causes extreme memory-access serialization when our Triton RMSNorm kernel runs alongside it. This is a kernel/quantization format mismatch, not a bug in the kernel itself.
-
-**Bottom line:** the kernels are correct and memory-efficient. The E2E ceiling is set by Amdahl, not kernel quality. And you should never apply FP16-tuned Triton kernels to GPTQ checkpoints.
+**Bottom line:** the kernels are correct and memory-efficient. The E2E ceiling is set by Amdahl, not kernel quality.
 
 ---
 
@@ -160,10 +158,10 @@ All commands run from the repo root. Results land in `kernals/results/olmoe/` an
 Run this before anything else. It tests RMSNorm and Softmax on random tensors and on a live model forward pass to confirm the kernels match PyTorch outputs within tolerance.
 
 ```bash
-# OLMoE -- tests RMSNorm + Softmax + patched forward pass
+# OLMoE tests RMSNorm + Softmax + patched forward pass
 python kernals/validate_olmoe.py
 
-# Mixtral -- tests patched load and router module detection
+# Mixtral tests patched load and router module detection
 python kernals/validate_mixtral.py
 ```
 
