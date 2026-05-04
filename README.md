@@ -131,8 +131,6 @@ RoutingDrift/
 │
 └── report/                          # Cross-study aggregation
     ├── generate_report.py           # Reads all CSVs/JSONs -> 11 comparison plots
-    ├── combination_report.py        # Analyzes all optimization combinations (K×Q×C)
-    ├── permutation_report.py        # Full permutation grid (precision x kernel x compile)
     └── plots/                       # Generated figures (01-11)
 ```
 
@@ -149,7 +147,7 @@ pip install auto-gptq optimum
 
 ---
 
-### Sub-study 1 — Kernel Optimization *(GPU required)*
+### Kernel Optimization *(GPU required)*
 
 All commands run from the repo root. Results land in `kernals/results/olmoe/` and `kernals/results/mixtral/mixtral/`.
 
@@ -210,7 +208,7 @@ python kernals/results_table.py --model Mixtral --out kernals/results/mixtral/mi
 
 ---
 
-### Sub-study 2 — Routing Drift *(GPU required)*
+### Routing Drift *(GPU required)*
 
 ```bash
 # Run drift experiment across FP16, INT8, INT4
@@ -222,7 +220,7 @@ python quantization/harness_eval.py --model OLMoE --tasks mmlu gsm8k hellaswag
 
 ---
 
-### Sub-study 3 — Compiler Analysis *(CPU-friendly stubs available)*
+### Compiler Analysis *(CPU-friendly stubs available)*
 
 ```bash
 python Compiler/main.py --model OLMoE
@@ -231,13 +229,10 @@ python Compiler/main.py --model Mixtral
 
 ---
 
-### Cross-Study Report *(no GPU needed -- reads existing results)*
+### Report *(no GPU needed -- reads existing results)*
 
 ```bash
 python report/generate_report.py --out report/plots
-python report/combination_report.py --model OLMoE
-python report/permutation_report.py --model OLMoE
-python report/permutation_report.py --model Mixtral
 ```
 
 ---
@@ -261,7 +256,7 @@ python report/permutation_report.py --model Mixtral
 | Person | Role |
 |--------|------|
 | Gokul  | Triton kernel engineering (RMSNorm + Softmax), HPC runs on Zaratan |
-| Amogh  | Compiler sub-study -- graph break analysis, `torch.compile` mode sweep, TorchInductor IR inspection |
-| Giri   | Quantization sub-study -- routing drift metrics, per-layer analysis, lm-eval accuracy baseline |
+| Amogh  | Compiler: graph break analysis, `torch.compile` mode sweep, TorchInductor IR inspection |
+| Giri   | Quantization: routing drift metrics, per-layer analysis, lm-eval accuracy baseline |
 
 *MSML 605 · University of Maryland · Spring 2026*
