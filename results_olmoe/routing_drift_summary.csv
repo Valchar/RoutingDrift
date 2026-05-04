@@ -1,4 +1,0 @@
-precision,routing_similarity_rs,jaccard_drift,overlap_at_k,selection_shift
-fp16,1.0,0.0,1.0,0.0
-int8,0.954475,0.045525,0.965856,0.034144
-int4,0.913194,0.086806,0.934606,0.065394
