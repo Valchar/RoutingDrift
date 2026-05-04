@@ -6,6 +6,7 @@ lm-evaluation-harness integration for MMLU/GSM8K/HellaSwag.
 
 from __future__ import annotations
 
+import gc
 import json
 from pathlib import Path
 from typing import Any
@@ -29,7 +30,11 @@ def build_hf_model_args(
     """
     Build lm-eval HF model_args string for a precision setting.
     """
-    parts = [f"pretrained={model_name}", f"device={device}"]
+    parts = [
+        f"pretrained={model_name}",
+        f"device={device}",
+        "clean_up_tokenization_spaces=False",
+    ]
     if trust_remote_code:
         parts.append("trust_remote_code=True")
 
@@ -55,6 +60,19 @@ def build_hf_model_args(
     return ",".join(parts)
 
 
+def _patch_lm_eval_git_hash(lm_eval_module) -> None:
+    """
+    Avoid noisy git stderr in environments where the run directory isn't a git repo.
+    """
+    try:
+        evaluator = lm_eval_module.evaluator
+    except Exception:
+        return
+
+    if hasattr(evaluator, "get_git_commit_hash"):
+        evaluator.get_git_commit_hash = lambda: "unknown"
+
+
 def run_lm_eval(
     model_name: str,
     precision: str,
@@ -75,20 +93,64 @@ def run_lm_eval(
             "lm-evaluation-harness is not installed. Install with: pip install lm-eval"
         ) from exc
 
-    model_args = build_hf_model_args(
-        model_name=model_name,
-        precision=precision,
-        device=device,
-    )
+    _patch_lm_eval_git_hash(lm_eval)
 
-    results = lm_eval.simple_evaluate(
-        model="hf",
-        model_args=model_args,
-        tasks=tasks,
-        num_fewshot=num_fewshot,
-        batch_size=batch_size,
-        limit=limit,
-    )
+    precision = precision.lower().strip()
+
+    if precision in {"int8", "int4"}:
+        # For some remote-code models (including OLMoE variants), passing
+        # load_in_8bit/load_in_4bit via lm-eval model_args can leak through
+        # to model __init__. Load quantized model ourselves and pass LM object.
+        try:
+            from lm_eval.models.huggingface import HFLM
+        except ImportError as exc:
+            raise RuntimeError(
+                "Your lm-eval version does not expose lm_eval.models.huggingface.HFLM. "
+                "Upgrade lm-eval to a recent version to evaluate int8/int4 variants safely."
+            ) from exc
+        from model_loader import load_model
+
+        model, tokenizer = load_model(
+            model_name=model_name,
+            precision=precision,
+            device_map="auto",
+            trust_remote_code=True,
+        )
+        lm = HFLM(
+            pretrained=model,
+            tokenizer=tokenizer,
+            trust_remote_code=True,
+            batch_size=batch_size,
+            device=device,
+            clean_up_tokenization_spaces=False,
+        )
+        try:
+            results = lm_eval.simple_evaluate(
+                model=lm,
+                tasks=tasks,
+                num_fewshot=num_fewshot,
+                batch_size=batch_size,
+                limit=limit,
+            )
+        finally:
+            del lm
+            del model
+            del tokenizer
+            gc.collect()
+    else:
+        model_args = build_hf_model_args(
+            model_name=model_name,
+            precision=precision,
+            device=device,
+        )
+        results = lm_eval.simple_evaluate(
+            model="hf",
+            model_args=model_args,
+            tasks=tasks,
+            num_fewshot=num_fewshot,
+            batch_size=batch_size,
+            limit=limit,
+        )
 
     sanitized = _sanitize_for_json(results)
     output_path = Path(output_path)

@@ -149,16 +149,20 @@ def _run_lm_eval_matrix(
         precision = variant_to_precision[variant]
         output_path = eval_output_dir / f"lm_eval_{_sanitize_name_for_filename(variant)}.json"
         print(f"\n========== Running lm-eval for {variant} ({','.join(tasks)}) ==========")
-        result = run_lm_eval(
-            model_name=model_name,
-            precision=precision,
-            tasks=tasks,
-            output_path=output_path,
-            num_fewshot=num_fewshot,
-            batch_size=batch_size,
-            limit=limit,
-            device=device,
-        )
+        try:
+            result = run_lm_eval(
+                model_name=model_name,
+                precision=precision,
+                tasks=tasks,
+                output_path=output_path,
+                num_fewshot=num_fewshot,
+                batch_size=batch_size,
+                limit=limit,
+                device=device,
+            )
+        except Exception as exc:
+            print(f"[lm-eval WARNING] Skipping variant '{variant}' due to error: {exc}")
+            continue
         parsed = extract_task_accuracies(result, tasks)
         for task in tasks:
             task_info = parsed.get(task)
