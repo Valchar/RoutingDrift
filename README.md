@@ -147,7 +147,7 @@ pip install auto-gptq optimum
 
 ---
 
-### Sub-study 1 — Kernel Optimization *(GPU required)*
+### Kernel Optimization *(GPU required)*
 
 All commands run from the repo root. Results land in `kernals/results/olmoe/` and `kernals/results/mixtral/mixtral/`.
 
@@ -208,7 +208,7 @@ python kernals/results_table.py --model Mixtral --out kernals/results/mixtral/mi
 
 ---
 
-### Sub-study 2 — Routing Drift *(GPU required)*
+### Routing Drift *(GPU required)*
 
 ```bash
 # Run drift experiment across FP16, INT8, INT4
@@ -220,7 +220,7 @@ python quantization/harness_eval.py --model OLMoE --tasks mmlu gsm8k hellaswag
 
 ---
 
-### Sub-study 3 — Compiler Analysis *(CPU-friendly stubs available)*
+### Compiler Analysis *(CPU-friendly stubs available)*
 
 ```bash
 python Compiler/main.py --model OLMoE
@@ -229,7 +229,7 @@ python Compiler/main.py --model Mixtral
 
 ---
 
-### Cross-Study Report *(no GPU needed -- reads existing results)*
+### Report *(no GPU needed -- reads existing results)*
 
 ```bash
 python report/generate_report.py --out report/plots
