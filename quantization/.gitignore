@@ -1,0 +1,21 @@
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test artifacts
+.pytest_cache/
+
+# Environment files
+.env
+.venv
+*.sbatch
+

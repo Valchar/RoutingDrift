@@ -1,0 +1,158 @@
+{
+  "OLMoE": {
+    "graph_11": {
+      "total_graph_breaks": 1,
+      "total_subgraphs": 5,
+      "pct_compiled": 50.0,
+      "pct_eager": 50.0,
+      "breaks_per_layer": {
+        "moe_routing": 1
+      },
+      "break_reasons": {
+        "moe_routing": {
+          "other": 1
+        }
+      },
+      "ops_causing_breaks": {
+        "moe_routing": [
+          "if expert_mask.any():"
+        ]
+      }
+    },
+    "graph_12": {
+      "best_compile_mode": "reduce-overhead",
+      "compile_results": {
+        "eager": {
+          "compile_time_s": 0.0,
+          "p50_ms": 5.801920175552368,
+          "p90_ms": 5.898988866806031,
+          "p99_ms": 5.925786561965943,
+          "throughput_tps": 22061.661678724122,
+          "speedup": 1.0,
+          "peak_vram_mb": 212.107421875,
+          "compile_vram_overhead_mb": 212.107421875
+        },
+        "default": {
+          "compile_time_s": 78.61648806929588,
+          "p50_ms": 6.142719984054565,
+          "p90_ms": 6.195711851119995,
+          "p99_ms": 6.258221664428711,
+          "throughput_tps": 20837.67456961505,
+          "speedup": 0.9445197226331569,
+          "peak_vram_mb": 219.92041015625,
+          "compile_vram_overhead_mb": 7.81298828125
+        },
+        "reduce-overhead": {
+          "compile_time_s": 1.2754791639745235,
+          "p50_ms": 5.622688055038452,
+          "p90_ms": 5.777049636840821,
+          "p99_ms": 6.206820888519306,
+          "throughput_tps": 22764.912217618064,
+          "speedup": 1.0318765897662252,
+          "peak_vram_mb": 220.23388671875,
+          "compile_vram_overhead_mb": 8.12646484375
+        },
+        "max-autotune": {
+          "compile_time_s": 33.0669286493212,
+          "p50_ms": 5.62388801574707,
+          "p90_ms": 5.641532754898071,
+          "p99_ms": 5.670505166053773,
+          "throughput_tps": 22760.054901803844,
+          "speedup": 1.0316564197769944,
+          "peak_vram_mb": 220.23388671875,
+          "compile_vram_overhead_mb": 8.12646484375
+        }
+      }
+    },
+    "graph_14": {
+      "moe_name": "OLMoE",
+      "dense_name": "Dense-OLMoE",
+      "moe_p50_ms": 5.773385055363178,
+      "dense_p50_ms": 1.2256409972906113,
+      "moe_throughput_tps": 22170.702070372834,
+      "dense_throughput_tps": 104435.1488592136,
+      "speedup_moe_vs_dense": 0.21229157340753735,
+      "routing_overhead_ms": 4.547744058072567,
+      "moe_params": 41168384,
+      "dense_params": 36440576
+    }
+  },
+  "Mixtral": {
+    "graph_11": {
+      "total_graph_breaks": 1,
+      "total_subgraphs": 5,
+      "pct_compiled": 50.0,
+      "pct_eager": 50.0,
+      "breaks_per_layer": {
+        "other": 1
+      },
+      "break_reasons": {
+        "other": {
+          "dynamic shape: nonzero/where": 1
+        }
+      },
+      "ops_causing_breaks": {
+        "other": [
+          "idx=torch.where(expert_mask[expert_idx])"
+        ]
+      }
+    },
+    "graph_12": {
+      "best_compile_mode": "max-autotune",
+      "compile_results": {
+        "eager": {
+          "compile_time_s": 0.0,
+          "p50_ms": 5.103360176086426,
+          "p90_ms": 5.186899280548095,
+          "p99_ms": 5.197826933860779,
+          "throughput_tps": 25081.514058088364,
+          "speedup": 1.0,
+          "peak_vram_mb": 212.107421875,
+          "compile_vram_overhead_mb": 212.107421875
+        },
+        "default": {
+          "compile_time_s": 2.258697399869561,
+          "p50_ms": 5.735408067703247,
+          "p90_ms": 5.773392009735107,
+          "p99_ms": 5.797428636550904,
+          "throughput_tps": 22317.50530895665,
+          "speedup": 0.8897989673697401,
+          "peak_vram_mb": 219.9189453125,
+          "compile_vram_overhead_mb": 7.8115234375
+        },
+        "reduce-overhead": {
+          "compile_time_s": 1.1494174487888813,
+          "p50_ms": 5.109391927719116,
+          "p90_ms": 5.177004957199097,
+          "p99_ms": 5.198545093536377,
+          "throughput_tps": 25051.904768859742,
+          "speedup": 0.998819477597722,
+          "peak_vram_mb": 220.232421875,
+          "compile_vram_overhead_mb": 8.125
+        },
+        "max-autotune": {
+          "compile_time_s": 23.357042856514454,
+          "p50_ms": 5.076352119445801,
+          "p90_ms": 5.173199987411499,
+          "p99_ms": 5.226751804351807,
+          "throughput_tps": 25214.95691949244,
+          "speedup": 1.0053203670677544,
+          "peak_vram_mb": 220.232421875,
+          "compile_vram_overhead_mb": 8.125
+        }
+      }
+    },
+    "graph_14": {
+      "moe_name": "Mixtral",
+      "dense_name": "Dense-Mixtral",
+      "moe_p50_ms": 5.166122689843178,
+      "dense_p50_ms": 1.2610992416739464,
+      "moe_throughput_tps": 24776.802194739503,
+      "dense_throughput_tps": 101498.75265177111,
+      "speedup_moe_vs_dense": 0.24410942546008874,
+      "routing_overhead_ms": 3.9050234481692314,
+      "moe_params": 60041728,
+      "dense_params": 41159168
+    }
+  }
+}

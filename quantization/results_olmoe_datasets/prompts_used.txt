@@ -1,0 +1,5 @@
+1. Explain quantization in machine learning using simple terms.
+2. What is the difference between a compiler and an interpreter?
+3. Write a short Python function to reverse a list.
+4. Explain mixture of experts models in two sentences.
+5. Summarize the benefits and risks of using AI in hiring.

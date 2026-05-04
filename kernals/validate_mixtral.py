@@ -33,6 +33,7 @@ if __name__=="__main__":
     # patched — with Triton kernels
     model, tok=load_mixtral(precision="gptq", kernels=True)
     _, patch_logits=validate_patch(model, tok, "Mixtral patched")
+    print("  note: Mixtral GPTQ uses RMSNorm kernel replacements only; router softmax patching is disabled for numeric correctness.")
     max_err=(patch_logits-base_logits).abs().max().item()
     print(f"  max logit diff: {max_err:.4f}  {'PASS' if max_err<0.1 else 'FAIL'}")
     del model; torch.cuda.empty_cache()

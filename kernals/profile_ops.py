@@ -94,15 +94,17 @@ def compute_amdahl(out_dir, rn_rows, sfx_rows, base_ops, model_name="OLMoE"):
     combined=rn_pct+sfx_pct
     rn_speedup=next((r["speedup"] for r in rn_rows if r["config"]=="kernel" and r["hidden"]==HIDDEN), 1.0)
     sfx_speedup=next((r["speedup"] for r in sfx_rows if r["config"]=="kernel" and r["model"]==model_name), 1.0)
-    avg_speedup=(rn_speedup+sfx_speedup)/2
+    # Combine operation speedups by their contribution to the optimized fraction.
+    effective_speedup=1.0/((rn_pct/combined)/rn_speedup + (sfx_pct/combined)/sfx_speedup) if combined > 0 else 1.0
     # Amdahl: max system speedup = 1 / ((1-f) + f/s)
-    predicted=1.0/((1.0-combined)+combined/avg_speedup)
+    predicted=1.0/((1.0-combined)+combined/effective_speedup)
     rows=[
         {"metric":"rmsnorm_pct","value":round(rn_pct*100,2)},
         {"metric":"softmax_pct","value":round(sfx_pct*100,2)},
         {"metric":"combined_pct","value":round(combined*100,2)},
         {"metric":"rmsnorm_speedup","value":round(rn_speedup,3)},
         {"metric":"softmax_speedup","value":round(sfx_speedup,3)},
+        {"metric":"effective_speedup","value":round(effective_speedup,3)},
         {"metric":"predicted_e2e_speedup","value":round(predicted,3)},
     ]
     _save(rows, os.path.join(out_dir, "profile_amdahl.csv"))

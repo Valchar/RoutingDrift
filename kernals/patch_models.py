@@ -6,7 +6,7 @@ import os
 import torch
 import torch.nn as nn
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from rms_norm import fused_rms_norm
+from rms_norm import fused_rms_norm, torch_rms_norm
 from softmax import fused_softmax
 
 OLMOE_PATH="/scratch/zt1/project/msml605/user/gsakthiv/models/OLMoE-1B-7B"
@@ -17,25 +17,50 @@ DEVICE="cuda"
 class FusedRMSNorm(nn.Module):
     def __init__(self, weight: torch.Tensor, eps: float=1e-6):
         super().__init__()
-        self.weight=nn.Parameter(weight.half())
+        self.register_buffer("weight", weight.detach().to(dtype=torch.float16).contiguous())
         self.eps=eps
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         orig_dtype=x.dtype
-        return fused_rms_norm(x.half(), self.weight, self.eps).to(orig_dtype)
+        weight=self.weight
+        if getattr(weight, "is_meta", False):
+            raise RuntimeError("cannot run fused RMSNorm with a meta-device weight; load the model fully before patching")
+        if x.is_cuda:
+            if weight.device!=x.device or weight.dtype!=torch.float16:
+                weight=weight.to(device=x.device, dtype=torch.float16).contiguous()
+                self.weight=weight
+            return fused_rms_norm(x.to(torch.float16), weight, self.eps).to(orig_dtype)
+        return torch_rms_norm(x, weight.to(device=x.device, dtype=x.dtype), self.eps).to(orig_dtype)
 
 
 def patch_rmsnorm(model, rmsnorm_class_names=("LlamaRMSNorm", "MistralRMSNorm", "MixtralRMSNorm", "OlmoeRMSNorm", "RMSNorm")):
     patched=0
+    skipped=0
     for name, module in list(model.named_modules()):
         if type(module).__name__ in rmsnorm_class_names:
+            weight=getattr(module, "weight", None)
+            if weight is None or getattr(weight, "is_meta", False):
+                skipped+=1
+                continue
             parts=name.split(".")
             parent=model
             for p in parts[:-1]:
                 if p: parent=getattr(parent, p)
             eps=getattr(module, "variance_epsilon", getattr(module, "eps", 1e-6))
-            setattr(parent, parts[-1], FusedRMSNorm(module.weight.data.clone(), eps=eps))
+            setattr(parent, parts[-1], FusedRMSNorm(weight.detach().clone(), eps=eps))
             patched+=1
+    if skipped:
+        print(f"  skipped {skipped} RMSNorm layers with meta/missing weights")
     return patched
+
+
+def _count_quantized_linear_modules(model):
+    count=0
+    for module in model.modules():
+        cls=type(module).__name__.lower()
+        if hasattr(module, "qweight") or "quantlinear" in cls or "qlinear" in cls:
+            count+=1
+    return count
 
 
 def _make_router_patcher(orig_forward, num_experts):
@@ -96,11 +121,29 @@ def load_olmoe(precision="fp16", kernels=True):
 def load_mixtral(precision="gptq", kernels=True):
     print(f"\nLoading Mixtral [{precision}]{' + kernels' if kernels else ''}...")
     tokenizer=AutoTokenizer.from_pretrained(MIXTRAL_PATH)
+    model=None
+    precision=precision.lower().strip()
     if precision=="gptq":
-        model=AutoModelForCausalLM.from_pretrained(
-            MIXTRAL_PATH, device_map="auto",
-            torch_dtype=torch.float16, trust_remote_code=True,
-        ).eval()
+        try:
+            from auto_gptq import AutoGPTQForCausalLM
+            model=AutoGPTQForCausalLM.from_quantized(
+                MIXTRAL_PATH, device_map="auto", trust_remote_code=True,
+            ).eval()
+        except Exception as exc:
+            print(f"  AutoGPTQ load failed ({type(exc).__name__}: {exc}); trying transformers GPTQ loader")
+            model=AutoModelForCausalLM.from_pretrained(
+                MIXTRAL_PATH, device_map="auto",
+                torch_dtype=torch.float16, trust_remote_code=True,
+            ).eval()
+        quantized_modules=_count_quantized_linear_modules(model)
+        if quantized_modules==0:
+            raise RuntimeError(
+                "Mixtral GPTQ checkpoint was not loaded as quantized layers. "
+                "The qweight/qzeros/scales tensors were ignored, so the model "
+                "would contain newly initialized dense weights. Install/use a "
+                "compatible auto-gptq/optimum/transformers stack before profiling."
+            )
+        print(f"  loaded {quantized_modules} quantized linear modules")
     elif precision=="int8":
         model=AutoModelForCausalLM.from_pretrained(MIXTRAL_PATH, load_in_8bit=True, device_map="auto").eval()
     elif precision=="int4":
@@ -109,9 +152,8 @@ def load_mixtral(precision="gptq", kernels=True):
         raise ValueError(f"unsupported Mixtral precision: {precision}")
     if kernels:
         n_rms=patch_rmsnorm(model)
-        # Mixtral has only 8 router logits per token. Replacing that softmax with
-        # a separate Triton launch per layer changes GPTQ routing enough to fail
-        # logit validation and is much slower end-to-end.
+        # Mixtral router softmax patch is currently not safe for GPTQ.
+        # Keep the RMSNorm kernel replacements only so validation remains correct.
         n_sfx=0
         print(f"  patched {n_rms} RMSNorm + {n_sfx} router softmax layers")
     return model, tokenizer

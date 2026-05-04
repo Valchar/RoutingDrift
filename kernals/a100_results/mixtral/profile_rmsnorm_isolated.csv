@@ -1,9 +1,0 @@
-op,hidden,config,time_ms,speedup,bandwidth_gbs
-rmsnorm,512,baseline,0.0724,1.0,86.91
-rmsnorm,512,kernel,0.0131,5.508,478.7
-rmsnorm,1024,baseline,0.0957,1.0,131.5
-rmsnorm,1024,kernel,0.0145,6.619,870.4
-rmsnorm,2048,baseline,0.1413,1.0,178.05
-rmsnorm,2048,kernel,0.0201,7.046,1254.47
-rmsnorm,4096,baseline,0.3028,1.0,166.21
-rmsnorm,4096,kernel,0.0329,9.194,1528.21

@@ -1,0 +1,13 @@
+kernel,config,time_ms,flops,mem_bytes,arith_intensity,ridge_point,region,achieved_bw_gbs,pct_peak_bw,achieved_tflops,pct_peak_compute,est_occupancy_pct
+RMSNorm h=512,baseline,0.0719,5242880,8388608,0.625,156.0,memory-bound,116.7,5.84,0.0729,0.023,90.0
+RMSNorm h=512,triton,0.011,5242880,6291456,0.833,156.0,memory-bound,574.14,28.71,0.4784,0.153,100.0
+RMSNorm h=1024,baseline,0.0756,10485760,16777216,0.625,156.0,memory-bound,221.85,11.09,0.1387,0.044,90.0
+RMSNorm h=1024,triton,0.0139,10485760,12582912,0.833,156.0,memory-bound,907.83,45.39,0.7565,0.242,100.0
+RMSNorm h=2048,baseline,0.1424,20971520,33554432,0.625,156.0,memory-bound,235.71,11.79,0.1473,0.047,90.0
+RMSNorm h=2048,triton,0.02,20971520,25165824,0.833,156.0,memory-bound,1257.83,62.89,1.0482,0.336,100.0
+RMSNorm h=4096,baseline,0.3035,41943040,67108864,0.625,156.0,memory-bound,221.13,11.06,0.1382,0.044,90.0
+RMSNorm h=4096,triton,0.0329,41943040,50331648,0.833,156.0,memory-bound,1528.72,76.44,1.2739,0.408,100.0
+Softmax OLMoE N=64,baseline,0.0175,524288,524288,1.0,156.0,memory-bound,29.97,1.5,0.03,0.01,90.0
+Softmax OLMoE N=64,triton,0.0082,524288,524288,1.0,156.0,memory-bound,64.14,3.21,0.0641,0.021,45.0
+Softmax Mixtral N=8,baseline,0.0164,65536,65536,1.0,156.0,memory-bound,4.01,0.2,0.004,0.001,90.0
+Softmax Mixtral N=8,triton,0.0078,65536,65536,1.0,156.0,memory-bound,8.4,0.42,0.0084,0.003,22.5

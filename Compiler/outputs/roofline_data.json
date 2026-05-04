@@ -1,0 +1,126 @@
+{
+  "OLMoE": {
+    "model_name": "OLMoE",
+    "hw": {
+      "device_name": "A100",
+      "peak_flops_tflops": 312.0,
+      "peak_bandwidth_gbps": 2000.0
+    },
+    "records": [
+      {
+        "op_name": "embed_lookup",
+        "layer_type": "embed",
+        "flops": 65536,
+        "bytes_accessed": 32899072,
+        "arithmetic_intensity": 0.00199203187250996,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "rmsnorm",
+        "layer_type": "rmsnorm",
+        "flops": 524288,
+        "bytes_accessed": 1048576,
+        "arithmetic_intensity": 0.5,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "attention",
+        "layer_type": "attention",
+        "flops": 570425344,
+        "bytes_accessed": 6815744,
+        "arithmetic_intensity": 83.6923076923077,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "moe_routing",
+        "layer_type": "moe_routing",
+        "flops": 2099200,
+        "bytes_accessed": 290816,
+        "arithmetic_intensity": 7.21830985915493,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "ffn_expert",
+        "layer_type": "ffn",
+        "flops": 402653184,
+        "bytes_accessed": 4718592,
+        "arithmetic_intensity": 85.33333333333333,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "lm_head",
+        "layer_type": "lm_head",
+        "flops": 4194304000,
+        "bytes_accessed": 41091072,
+        "arithmetic_intensity": 102.07336523125997,
+        "bound_type": "memory"
+      }
+    ],
+    "ridge_point": 156.0,
+    "memory_bound_ops": 6,
+    "compute_bound_ops": 0,
+    "overall_bound": "memory"
+  },
+  "Mixtral": {
+    "model_name": "Mixtral",
+    "hw": {
+      "device_name": "A100",
+      "peak_flops_tflops": 312.0,
+      "peak_bandwidth_gbps": 2000.0
+    },
+    "records": [
+      {
+        "op_name": "embed_lookup",
+        "layer_type": "embed",
+        "flops": 65536,
+        "bytes_accessed": 32899072,
+        "arithmetic_intensity": 0.00199203187250996,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "rmsnorm",
+        "layer_type": "rmsnorm",
+        "flops": 524288,
+        "bytes_accessed": 1048576,
+        "arithmetic_intensity": 0.5,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "attention",
+        "layer_type": "attention",
+        "flops": 570425344,
+        "bytes_accessed": 6815744,
+        "arithmetic_intensity": 83.6923076923077,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "moe_routing",
+        "layer_type": "moe_routing",
+        "flops": 2099200,
+        "bytes_accessed": 290816,
+        "arithmetic_intensity": 7.21830985915493,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "ffn_expert",
+        "layer_type": "ffn",
+        "flops": 1610612736,
+        "bytes_accessed": 15728640,
+        "arithmetic_intensity": 102.4,
+        "bound_type": "memory"
+      },
+      {
+        "op_name": "lm_head",
+        "layer_type": "lm_head",
+        "flops": 4194304000,
+        "bytes_accessed": 41091072,
+        "arithmetic_intensity": 102.07336523125997,
+        "bound_type": "memory"
+      }
+    ],
+    "ridge_point": 156.0,
+    "memory_bound_ops": 6,
+    "compute_bound_ops": 0,
+    "overall_bound": "memory"
+  }
+}

@@ -262,7 +262,7 @@ def plot_amdahl(out_dir, plots_dir, model_name):
     rn_pct=d.get("rmsnorm_pct", 0); sfx_pct=d.get("softmax_pct", 0)
     other=100-rn_pct-sfx_pct
     rn_sp=d.get("rmsnorm_speedup", 1.0); sfx_sp=d.get("softmax_speedup", 1.0)
-    avg_sp=(rn_sp+sfx_sp)/2
+    avg_sp=d.get("effective_speedup", (rn_sp+sfx_sp)/2)
     combined=d.get("combined_pct", 0)/100
     predicted=d.get("predicted_e2e_speedup", 1.0)
     fig, (ax1, ax2)=plt.subplots(1, 2, figsize=(11, 5))
@@ -273,7 +273,7 @@ def plot_amdahl(out_dir, plots_dir, model_name):
     ax1.set_title(f"{model_name} — Forward Pass Op Fractions")
     fracs=np.linspace(0, 1, 200)
     curve=1.0/((1.0-fracs)+fracs/avg_sp)
-    ax2.plot(fracs*100, curve, "k-", linewidth=2, label=f"Amdahl (kernel={avg_sp:.1f}x)")
+    ax2.plot(fracs*100, curve, "k-", linewidth=2, label=f"Amdahl (effective kernel={avg_sp:.1f}x)")
     ax2.axvline(x=combined*100, color="red", linestyle="--", alpha=0.7,
                 label=f"Actual op fraction ({combined*100:.1f}%)")
     ax2.scatter([combined*100], [predicted], color="red", s=150, zorder=5,

@@ -1,0 +1,5 @@
+op,model,num_experts,config,time_ms,speedup,bandwidth_gbs
+softmax,OLMoE,64,baseline,0.0173,1.0,30.36
+softmax,OLMoE,64,kernel,0.0087,1.994,60.53
+softmax,Mixtral,8,baseline,0.0166,1.0,3.94
+softmax,Mixtral,8,kernel,0.0075,2.227,8.78
