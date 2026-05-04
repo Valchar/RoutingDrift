@@ -131,8 +131,6 @@ RoutingDrift/
 │
 └── report/                          # Cross-study aggregation
     ├── generate_report.py           # Reads all CSVs/JSONs -> 11 comparison plots
-    ├── combination_report.py        # Analyzes all optimization combinations (K×Q×C)
-    ├── permutation_report.py        # Full permutation grid (precision x kernel x compile)
     └── plots/                       # Generated figures (01-11)
 ```
 
@@ -235,9 +233,6 @@ python Compiler/main.py --model Mixtral
 
 ```bash
 python report/generate_report.py --out report/plots
-python report/combination_report.py --model OLMoE
-python report/permutation_report.py --model OLMoE
-python report/permutation_report.py --model Mixtral
 ```
 
 ---
@@ -261,7 +256,7 @@ python report/permutation_report.py --model Mixtral
 | Person | Role |
 |--------|------|
 | Gokul  | Triton kernel engineering (RMSNorm + Softmax), HPC runs on Zaratan |
-| Amogh  | Compiler sub-study -- graph break analysis, `torch.compile` mode sweep, TorchInductor IR inspection |
-| Giri   | Quantization sub-study -- routing drift metrics, per-layer analysis, lm-eval accuracy baseline |
+| Amogh  | Compiler: graph break analysis, `torch.compile` mode sweep, TorchInductor IR inspection |
+| Giri   | Quantization: routing drift metrics, per-layer analysis, lm-eval accuracy baseline |
 
 *MSML 605 · University of Maryland · Spring 2026*
