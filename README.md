@@ -1,7 +1,4 @@
 # Routing Fidelity as a Systems Metric: Characterizing Optimization-Induced Drift in MoE
-
-**MSML 605 Final Project · University of Maryland**
-
 ---
 
 ## What is this?
